@@ -126,6 +126,16 @@ public sealed partial class MainView
 
     private Control BuildConflict(SyncConflict conflict)
     {
+        var actions = Wrap(
+            ActionButton("Записать локальную версию в Timeweb", () => ResolveConflict(conflict, true),
+                id: "VapeMeter.KeepLocal." + conflict.OperationId),
+            ActionButton("Взять версию Timeweb", () => ResolveConflict(conflict, false),
+                id: "VapeMeter.KeepServer." + conflict.OperationId));
+        return Inset(Column(7, DescribeConflict(conflict), actions));
+    }
+
+    private static Control DescribeConflict(SyncConflict conflict)
+    {
         var reason = conflict.Code switch
         {
             "duplicate_date" => "Эта дата уже отмечена на сервере",
@@ -133,26 +143,42 @@ public sealed partial class MainView
             "version_conflict" => "Запись изменилась на другом устройстве",
             _ => "Нужно согласовать изменение с сервером",
         };
-        var local = conflict.LocalDate is DateOnly localDate ? DateText(localDate) : "удаление";
-        var server = conflict.ServerDate is DateOnly serverDate ? DateText(serverDate) : "записи нет";
-        var actions = Wrap(
-            ActionButton("Оставить моё", () => ResolveConflict(conflict, true), id: "VapeMeter.KeepLocal." + conflict.OperationId),
-            ActionButton("Принять серверное", () => ResolveConflict(conflict, false), id: "VapeMeter.KeepServer." + conflict.OperationId));
-        return Inset(Column(7,
-            Text(reason, 14, FontWeight.SemiBold, wrap: true),
-            Text($"У меня: {local}\nНа сервере: {server}", 12, tone: "muted", wrap: true),
-            actions));
+        var local = conflict.LocalDate is DateOnly localDate
+            ? $"отметить замену {DateText(localDate)}" : "убрать замену";
+        var remote = conflict.TimewebRecord switch
+        {
+            { Deleted: true } removed => $"замена за {DateText(removed.Date)} убрана",
+            { } record => $"замена за {DateText(record.Date)} отмечена",
+            _ => "записи нет",
+        };
+        var details = Column(6, Text(reason, 14, FontWeight.SemiBold, wrap: true));
+        if (conflict.PreviousDate is { } previous)
+        {
+            details.Children.Add(Text($"Исходная дата: {DateText(previous)}", 13, tone: "muted", wrap: true));
+        }
+        details.Children.Add(Text($"Локально: {local}\nВ Timeweb: {remote}", 13, wrap: true));
+        if (conflict.OccupyingRecord is { } occupant)
+        {
+            var message = $"В Timeweb уже есть отдельная замена за {DateText(occupant.Date)}.";
+            if (conflict.KeepLocalRemovesSource && conflict.TimewebRecord is { } source)
+            {
+                message += $" Локальный вариант уберёт в Timeweb замену за {DateText(source.Date)}.";
+            }
+            details.Children.Add(Text(message, 13, tone: "muted", wrap: true));
+        }
+        return details;
     }
 
     private void ResolveConflict(SyncConflict conflict, bool keepLocal)
     {
         try
         {
-            _store.ResolveConflict(conflict.OperationId, keepLocal);
-            AfterChange("Выбран вариант записи");
+            _store.ResolveConflict(conflict, keepLocal);
+            AfterChange(keepLocal ? "Выбран локальный вариант" : "Принята версия Timeweb");
         }
         catch (Exception error)
         {
+            Refresh();
             ShowError(error);
         }
     }

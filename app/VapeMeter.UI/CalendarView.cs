@@ -64,9 +64,12 @@ public sealed partial class MainView
             place++;
         }
 
-        var selected = recordsByDay.GetValueOrDefault(_selectedDate);
-        return OverviewCard(Column(IsCondensedOverview ? 8 : 11, headings, grid, BuildSelectedDate(selected)),
-            "VapeMeter.Calendar");
+        var calendar = Column(IsCondensedOverview ? 8 : 11, headings, grid);
+        if (!_mobileOverview)
+        {
+            calendar.Children.Add(BuildSelectedDate(recordsByDay.GetValueOrDefault(_selectedDate)));
+        }
+        return OverviewCard(calendar, "VapeMeter.Calendar");
     }
 
     private Control PeriodButtons()
@@ -98,12 +101,11 @@ public sealed partial class MainView
         var selected = date == _selectedDate;
         var title = DateText(date);
         var description = title + (record is null ? "" : ", есть замена") + (date == Today ? ", сегодня" : "");
-        var tile = ActionButton(description, () =>
-        {
-            _selectedDate = date;
-            Refresh();
-            Dispatcher.UIThread.Post(() => _selectedDateButton?.Focus(), DispatcherPriority.Loaded);
-        }, "day", id: "VapeMeter.Day." + date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture));
+        var tile = new Button();
+        tile.Classes.Add("vm-button");
+        tile.Classes.Add("day");
+        AutomationProperties.SetName(tile, description);
+        AutomationProperties.SetAutomationId(tile, "VapeMeter.Day." + date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture));
         tile.MinHeight = IsCondensedOverview ? 33 : _layout == LayoutMode.Wide ? 43 : 38;
         tile.HorizontalAlignment = HorizontalAlignment.Stretch;
         tile.HorizontalContentAlignment = HorizontalAlignment.Stretch;
@@ -144,6 +146,28 @@ public sealed partial class MainView
             face.Children.Add(marker);
         }
         tile.Content = face;
+        if (_mobileOverview)
+        {
+            tile.Click += (_, _) =>
+            {
+                _selectedDate = date;
+                _selectedDateButton?.Classes.Remove("selected");
+                _selectedDateButton = tile;
+                tile.Classes.Add("selected");
+            };
+            var remove = record is not null;
+            var action = DateMenuItem(remove ? "Убрать замену" : "Добавить замену", () => ApplyMobileDateAction(date, remove));
+            AutomationProperties.SetAutomationId(action, "VapeMeter.MobileDateAction");
+            tile.Flyout = new MenuFlyout { Items = { action } };
+            return tile;
+        }
+
+        tile.Click += (_, _) =>
+        {
+            _selectedDate = date;
+            Refresh();
+            Dispatcher.UIThread.Post(() => _selectedDateButton?.Focus(), DispatcherPriority.Loaded);
+        };
         var menu = new ContextMenu();
         if (record is null)
         {
@@ -157,6 +181,33 @@ public sealed partial class MainView
         tile.ContextMenu = menu;
         ToolTip.SetTip(tile, description);
         return tile;
+    }
+
+    private void ApplyMobileDateAction(DateOnly date, bool remove)
+    {
+        try
+        {
+            if (remove)
+            {
+                var current = _store.GetReplacements().FirstOrDefault(record => record.Date == date);
+                if (current is null)
+                {
+                    Refresh();
+                    return;
+                }
+                _store.DeleteReplacement(current.Id);
+                AfterChange("Замена убрана");
+            }
+            else
+            {
+                _store.AddReplacement(date);
+                AfterChange("Замена добавлена");
+            }
+        }
+        catch (Exception error)
+        {
+            ShowError(error);
+        }
     }
 
     private static MenuItem DateMenuItem(string label, Action action)
@@ -294,10 +345,15 @@ public sealed partial class MainView
 
     private void ShowDialog(string title, Control content, Button action, Control? focus = null)
     {
-        _dialogOriginalFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
         var cancel = ActionButton("Отмена", DismissDialog, id: "VapeMeter.DialogCancel");
         var actions = Row(7, cancel, action);
         actions.HorizontalAlignment = HorizontalAlignment.Right;
+        OpenDialog(title, content, actions, focus ?? cancel);
+    }
+
+    private void OpenDialog(string title, Control content, Control actions, Control focus)
+    {
+        _dialogOriginalFocus = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
         var card = Card(Column(13, Text(title, 19, FontWeight.SemiBold), content, actions), "VapeMeter.Dialog");
         card.HorizontalAlignment = HorizontalAlignment.Center;
         card.VerticalAlignment = VerticalAlignment.Center;
@@ -309,7 +365,7 @@ public sealed partial class MainView
         _scroll.IsEnabled = false;
         _sidebar.IsEnabled = false;
         _overlay.IsVisible = true;
-        Dispatcher.UIThread.Post(() => (focus ?? cancel).Focus(), DispatcherPriority.Loaded);
+        Dispatcher.UIThread.Post(() => focus.Focus(), DispatcherPriority.Loaded);
     }
 
     private void DismissDialog()
@@ -320,5 +376,6 @@ public sealed partial class MainView
         _sidebar.IsEnabled = true;
         _dialogOriginalFocus?.Focus();
         _dialogOriginalFocus = null;
+        Dispatcher.UIThread.Post(TryOfferSyncConflict);
     }
 }

@@ -11,6 +11,10 @@ on:
         description: Previous release to install before testing the upgrade
         required: false
         type: string
+      exercise_sync:
+        description: Exercise the separate loopback-only APK against a synthetic server
+        default: false
+        type: boolean
 
 permissions:
   # GitHub only exposes draft releases to callers with repository push access.
@@ -31,10 +35,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
           PREVIOUS_TAG: ${{ inputs.previous_tag }}
+          EXERCISE_SYNC: ${{ inputs.exercise_sync }}
         run: |
           gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-android-arm64.apk' --output "$RUNNER_TEMP/candidate.apk" -- "$RELEASE_TAG"
           if [[ -n "$PREVIOUS_TAG" ]]; then
             gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-android-arm64.apk' --output "$RUNNER_TEMP/previous.apk" -- "$PREVIOUS_TAG"
+          fi
+          if [[ "$EXERCISE_SYNC" == true ]]; then
+            gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-smoke-only.apk' --output "$RUNNER_TEMP/smoke-only.apk" -- "$RELEASE_TAG"
           fi
 
       - name: Enable hardware acceleration
@@ -54,4 +62,4 @@ jobs:
           script: bash .github/scripts/android-launch.sh
       - name: Remove test APKs
         if: always()
-        run: rm -f "$RUNNER_TEMP/candidate.apk" "$RUNNER_TEMP/previous.apk"
+        run: rm -f "$RUNNER_TEMP/candidate.apk" "$RUNNER_TEMP/previous.apk" "$RUNNER_TEMP/smoke-only.apk"

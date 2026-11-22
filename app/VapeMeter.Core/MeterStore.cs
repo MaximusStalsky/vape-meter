@@ -6,7 +6,7 @@ namespace VapeMeter.Core;
 
 public sealed partial class MeterStore
 {
-    private const int SchemaVersion = 1;
+    private const int SchemaVersion = 2;
     private const int ApplicationId = 0x564D4554;
     private readonly string databasePath;
 
@@ -23,7 +23,14 @@ public sealed partial class MeterStore
         var application = ReadPragma(db, tx, "PRAGMA application_id");
         if (version != SchemaVersion || application != ApplicationId)
         {
-            Initialize(db, tx, version, application);
+            if (application == ApplicationId && version == 1)
+            {
+                MigrateFrom1(db, tx);
+            }
+            else
+            {
+                Initialize(db, tx, version, application);
+            }
         }
 
         tx.Commit();
@@ -113,8 +120,10 @@ public sealed partial class MeterStore
         }
 
         EnsureDateAvailable(records, date, id);
-        var expected = prior?.ExpectedVersion ?? ReadServerRecord(db, tx, id)?.Version ?? 0;
-        SaveChange(db, tx, new(id, Guid.NewGuid(), expected, date));
+        var remote = ReadServerRecord(db, tx, id);
+        var expected = prior?.ExpectedVersion ?? remote?.Version ?? 0;
+        var previousDate = prior is null ? ActiveDate(remote) : prior.PreviousDate;
+        SaveChange(db, tx, new(id, Guid.NewGuid(), expected, date, PreviousDate: previousDate));
     });
 
     public void DeleteReplacement(Guid id) => Write((db, tx) =>
@@ -122,14 +131,16 @@ public sealed partial class MeterStore
         RequireVisible(ReadEffective(db, tx), id);
         var prior = ReadChange(db, tx, id);
         EnsureNoConflict(prior);
-        var expected = prior?.ExpectedVersion ?? ReadServerRecord(db, tx, id)?.Version ?? 0;
+        var remote = ReadServerRecord(db, tx, id);
+        var expected = prior?.ExpectedVersion ?? remote?.Version ?? 0;
         if (expected == 0 && ReadInflight(db, tx)?.RecordId != id)
         {
             RemoveChange(db, tx, id);
             return;
         }
 
-        SaveChange(db, tx, new(id, Guid.NewGuid(), expected, null));
+        var previousDate = prior is null ? ActiveDate(remote) : prior.PreviousDate;
+        SaveChange(db, tx, new(id, Guid.NewGuid(), expected, null, PreviousDate: previousDate));
     });
 
     public void Export(string path)
@@ -170,7 +181,7 @@ public sealed partial class MeterStore
         VerifyIntegrity(backup);
         using var tx = backup.BeginTransaction(deferred: true);
         if (ReadPragma(backup, tx, "PRAGMA application_id") != ApplicationId
-            || ReadPragma(backup, tx, "PRAGMA user_version") != SchemaVersion)
+            || ReadPragma(backup, tx, "PRAGMA user_version") is < 1 or > SchemaVersion)
         {
             throw new InvalidDataException("Этот файл не является совместимой резервной копией Vape Meter.");
         }
@@ -240,7 +251,8 @@ public sealed partial class MeterStore
                 expected_version INTEGER NOT NULL CHECK (expected_version >= 0),
                 date TEXT,
                 conflict_code TEXT,
-                server_date TEXT
+                previous_date TEXT,
+                merge_on_date INTEGER NOT NULL DEFAULT 0 CHECK (merge_on_date IN (0, 1))
             );
 
             CREATE TABLE inflight (
@@ -253,14 +265,40 @@ public sealed partial class MeterStore
         mark.ExecuteNonQuery();
     }
 
+    private static void MigrateFrom1(SqliteConnection db, SqliteTransaction tx)
+    {
+        using var migrate = Command(db, tx, """
+            ALTER TABLE local_changes ADD COLUMN previous_date TEXT;
+            ALTER TABLE local_changes ADD COLUMN merge_on_date INTEGER NOT NULL DEFAULT 0 CHECK (merge_on_date IN (0, 1));
+            UPDATE local_changes SET previous_date = (
+                SELECT date FROM server_records
+                WHERE server_records.record_id = local_changes.record_id
+                    AND server_records.version = local_changes.expected_version AND deleted = 0
+            );
+            PRAGMA user_version = 2;
+            """);
+        migrate.ExecuteNonQuery();
+    }
+
     private static IReadOnlyList<Replacement> ReadEffective(SqliteConnection db, SqliteTransaction tx)
     {
         // Keep both IDs in the database when a pending local change and the server use the same date.
         // The pending intent owns the visible date until the user resolves the conflict.
-        var changes = ReadChanges(db, tx);
-        var changedIds = changes.Select(change => change.RecordId).ToHashSet();
-        var local = changes.Where(change => change.Date.HasValue)
-            .Select(change => new Replacement(change.RecordId, change.Date!.Value));
+        var changedIds = new HashSet<Guid>();
+        var local = new List<Replacement>();
+        using (var query = Command(db, tx, "SELECT record_id, date FROM local_changes ORDER BY rowid"))
+        using (var rows = query.ExecuteReader())
+        {
+            while (rows.Read())
+            {
+                var id = Guid.Parse(rows.GetString(0));
+                changedIds.Add(id);
+                if (ReadNullableDate(rows, 1) is { } date)
+                {
+                    local.Add(new(id, date));
+                }
+            }
+        }
         var remote = ReadServerRecords(db, tx)
             .Where(record => !record.Deleted && !changedIds.Contains(record.Id))
             .Select(record => new Replacement(record.Id, record.Date));

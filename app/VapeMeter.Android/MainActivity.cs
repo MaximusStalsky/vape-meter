@@ -25,4 +25,15 @@ public sealed class AndroidApplication : AvaloniaAndroidApplication<App>
         | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
 public sealed class MainActivity : AvaloniaMainActivity
 {
+    protected override void OnResume()
+    {
+        base.OnResume();
+        (Content as PhoneShell)?.SetSyncActive(true);
+    }
+
+    protected override void OnPause()
+    {
+        (Content as PhoneShell)?.SetSyncActive(false);
+        base.OnPause();
+    }
 }

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -15,6 +16,7 @@ namespace VapeMeter.Android;
 
 internal sealed class PhoneShell : Border
 {
+    private static readonly Color SystemBarsBackground = Color.Parse("#110D1C");
     private readonly MeterStore _store;
     private readonly AndroidCredentials _credentials;
     private readonly TimewebConnection _connection;
@@ -24,49 +26,70 @@ internal sealed class PhoneShell : Border
     private TextBox? _keyEntry;
     private CancellationTokenSource? _verification;
     private TopLevel? _topLevel;
+    private IInsetsManager? _insets;
     private IInputPane? _inputPane;
+    private Thickness _safeArea;
+    private bool _syncActive;
 
     public PhoneShell(MeterStore store, AndroidCredentials credentials, TimewebConnection connection)
     {
         _store = store;
         _credentials = credentials;
         _connection = connection;
-        TopLevel.SetAutoSafeAreaPadding(this, true);
+        TopLevel.SetAutoSafeAreaPadding(this, false);
+        Background = new SolidColorBrush(SystemBarsBackground);
         Child = _content;
 
         AttachedToVisualTree += (_, _) => AttachWindow();
         DetachedFromVisualTree += (_, _) => DetachWindow();
-        SizeChanged += (_, _) => UpdateKeyboardPadding();
+        SizeChanged += (_, _) => UpdateLayoutPadding();
 
+        (bool Configured, string? Token) saved;
         try
         {
-            var (configured, token) = _credentials.Load();
-            if (configured)
-            {
-                ShowJournal(token);
-            }
-            else
-            {
-                ShowConnection();
-            }
+            saved = _credentials.Load();
         }
-        catch (Exception)
+        catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException
+            or CryptographicException or global::Java.Lang.Exception)
         {
-            ShowConnection("Сохранённый ключ недоступен. Подключите Android заново.");
+            ShowJournal(null, "Сохранённый ключ недоступен. Подключите Android заново.");
+            return;
+        }
+
+        if (saved.Configured)
+        {
+            ShowJournal(saved.Token);
+        }
+        else
+        {
+            ShowConnection();
         }
     }
 
-    private void ShowJournal(string? token)
+    public void SetSyncActive(bool active)
+    {
+        _syncActive = active;
+        _journal?.SetSyncActive(active);
+    }
+
+    private void ShowJournal(string? token, string? connectionError = null)
     {
         CloseSetup();
         if (_journal is not null)
         {
+            _journal.SetSyncActive(false);
             _content.Children.Remove(_journal);
         }
 
         Func<CancellationToken, Task<SyncStatus>>? synchronize =
             token is null ? null : _connection.MakeSync(_store, token).SyncAsync;
-        _journal = new MainView(_store, synchronize, openPlatformSettings: () => ShowConnection());
+        _journal = new MainView(_store, synchronize,
+            openPlatformSettings: () => ShowConnection(connectionError), mobileOverview: true);
+        if (connectionError is not null)
+        {
+            _journal.MarkSavedKeyUnavailable();
+        }
+        _journal.SetSyncActive(_syncActive);
         _content.Children.Insert(0, _journal);
     }
 
@@ -237,9 +260,13 @@ internal sealed class PhoneShell : Border
             return;
         }
 
-        if (_topLevel.InsetsManager is { } insets)
+        _insets = _topLevel.InsetsManager;
+        if (_insets is { } insets)
         {
+            insets.SafeAreaChanged += OnSafeAreaChanged;
             insets.DisplayEdgeToEdgePreference = true;
+            insets.SystemBarColor = SystemBarsBackground;
+            _safeArea = insets.SafeAreaPadding;
         }
         _topLevel.BackRequested += OnBackRequested;
         _inputPane = _topLevel.InputPane;
@@ -247,9 +274,7 @@ internal sealed class PhoneShell : Border
         {
             _inputPane.StateChanged += OnInputPaneChanged;
         }
-        ActualThemeVariantChanged += OnThemeChanged;
-        UpdateSystemBars();
-        UpdateKeyboardPadding();
+        UpdateLayoutPadding();
     }
 
     private void DetachWindow()
@@ -263,9 +288,14 @@ internal sealed class PhoneShell : Border
         {
             _inputPane.StateChanged -= OnInputPaneChanged;
         }
-        ActualThemeVariantChanged -= OnThemeChanged;
+        if (_insets is not null)
+        {
+            _insets.SafeAreaChanged -= OnSafeAreaChanged;
+        }
         _topLevel = null;
         _inputPane = null;
+        _insets = null;
+        _safeArea = default;
     }
 
     private void OnBackRequested(object? sender, RoutedEventArgs args)
@@ -285,34 +315,31 @@ internal sealed class PhoneShell : Border
         }
     }
 
-    private void OnThemeChanged(object? sender, EventArgs args) => UpdateSystemBars();
-
-    private void UpdateSystemBars()
+    private void OnSafeAreaChanged(object? sender, SafeAreaChangedArgs args)
     {
-        if (_topLevel?.InsetsManager is { } insets)
-        {
-            insets.SystemBarColor = _store.Theme == "Light" ? Color.Parse("#F9F6FE") : Color.Parse("#110D1C");
-        }
+        _safeArea = args.SafeAreaPadding;
+        UpdateLayoutPadding();
     }
 
     private void OnInputPaneChanged(object? sender, InputPaneStateEventArgs args)
     {
-        UpdateKeyboardPadding();
+        UpdateLayoutPadding();
         if (_keyEntry is { IsFocused: true } entry)
         {
             Dispatcher.UIThread.Post(() => entry.BringIntoView(), DispatcherPriority.Loaded);
         }
     }
 
-    private void UpdateKeyboardPadding()
+    private void UpdateLayoutPadding()
     {
-        var bottomPadding = _topLevel is { } top
+        var keyboardPadding = _topLevel is { } top
             && _inputPane is { State: InputPaneState.Open } input
             && input.OccludedRect.Height > 0
             && this.TranslatePoint(new Point(0, Bounds.Height), top) is { } bottom
                 ? Math.Clamp(bottom.Y - input.OccludedRect.Top, 0, Bounds.Height)
                 : 0;
-        Padding = new Thickness(0, 0, 0, bottomPadding);
+        // The keyboard overlap is measured from the window bottom and already includes the navigation bar.
+        Padding = new Thickness(_safeArea.Left, _safeArea.Top, _safeArea.Right, Math.Max(_safeArea.Bottom, keyboardPadding));
     }
 
     private static TextBlock Label(string value, double fontSize, string tone = "")

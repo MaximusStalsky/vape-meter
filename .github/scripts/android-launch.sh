@@ -28,3 +28,7 @@ fi
 grep -F topResumedActivity <<<"$activities" | grep -F "$package/"
 adb shell pidof "$package"
 adb shell am force-stop "$package"
+
+if [[ -f "$RUNNER_TEMP/smoke-only.apk" ]]; then
+  python3 .github/scripts/android-sync-smoke.py "$RUNNER_TEMP/smoke-only.apk"
+fi

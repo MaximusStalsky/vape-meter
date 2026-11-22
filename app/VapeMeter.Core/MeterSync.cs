@@ -33,9 +33,9 @@ public sealed class MeterSync(MeterStore store, HttpClient client, Uri endpoint,
                         throw new InvalidDataException("Сервер не подтвердил смену набора данных.");
                     }
                 }
-                else
+                else if (store.ApplyReply(operation, reply))
                 {
-                    store.ApplyReply(operation, reply);
+                    await ReadStateAsync(force: true, cancellationToken).ConfigureAwait(false);
                 }
             }
 

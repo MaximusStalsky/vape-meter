@@ -21,6 +21,7 @@ public sealed partial class MainView : UserControl
     private readonly Func<bool>? _getCloseToTray;
     private readonly Action<bool>? _setCloseToTray;
     private readonly Action? _openPlatformSettings;
+    private readonly bool _mobileOverview;
     private readonly Grid _workspace = new();
     private readonly Border _sidebar = new();
     private readonly Border _body = new();
@@ -49,13 +50,14 @@ public sealed partial class MainView : UserControl
 
     public MainView(MeterStore store, Func<CancellationToken, Task<SyncStatus>>? synchronize = null,
         bool useHostBackdrop = false, Func<bool>? getCloseToTray = null, Action<bool>? setCloseToTray = null,
-        Action? openPlatformSettings = null)
+        Action? openPlatformSettings = null, bool mobileOverview = false)
     {
         _store = store;
         _synchronize = synchronize;
         _getCloseToTray = getCloseToTray;
         _setCloseToTray = setCloseToTray;
         _openPlatformSettings = openPlatformSettings;
+        _mobileOverview = mobileOverview;
         _sections =
         [
             new("Overview", "Обзор", "Календарь замен и срок службы картриджей", "home", BuildOverview),
@@ -121,13 +123,15 @@ public sealed partial class MainView : UserControl
         {
             _lifetime?.Dispose();
             _lifetime = new CancellationTokenSource();
-            _ = SynchronizeAsync();
+            RequestSync();
         };
         DetachedFromVisualTree += (_, _) =>
         {
             _lifetime?.Cancel();
+            _syncTimer.Stop();
             _noticeTimer.Stop();
         };
+        _syncTimer.Tick += (_, _) => RequestSync();
         AddHandler(KeyDownEvent, (_, args) =>
         {
             if (args.Key == Key.Escape && _overlay.IsVisible)
@@ -249,7 +253,8 @@ public sealed partial class MainView : UserControl
                 Grid.SetColumn(button, i);
                 row.Children.Add(button);
             }
-            _sidebar.Child = row;
+            var syncStatus = BuildMobileSyncStatus();
+            _sidebar.Child = syncStatus is null ? row : Column(4, syncStatus, row);
             return;
         }
 
@@ -334,7 +339,9 @@ public sealed partial class MainView : UserControl
             _body.Padding = IsCondensedOverview
                 ? new Thickness(horizontal, 10, horizontal, 10)
                 : _layout == LayoutMode.Wide ? new Thickness(horizontal, 20, horizontal, 25) : new Thickness(horizontal, 15, horizontal, 20);
-            _body.Child = Column(IsCondensedOverview ? 9 : 14, Intro(), _section.Build());
+            _body.Child = _mobileOverview && _section.Id == "Overview"
+                ? _section.Build()
+                : Column(IsCondensedOverview ? 9 : 14, Intro(), _section.Build());
             Dispatcher.UIThread.Post(() => _scroll.Offset = offset, DispatcherPriority.Loaded);
         }
         catch (Exception error)
@@ -374,63 +381,11 @@ public sealed partial class MainView : UserControl
         return grid;
     }
 
-    private async Task SynchronizeAsync(bool manual = false)
-    {
-        if (_synchronize is null || _lifetime is not { IsCancellationRequested: false } lifetime)
-        {
-            return;
-        }
-        if (_syncBusy)
-        {
-            _syncQueued = true;
-            return;
-        }
-        _syncBusy = true;
-        try
-        {
-            do
-            {
-                _syncQueued = false;
-                await _synchronize(lifetime.Token);
-                _syncError = null;
-            }
-            while (_syncQueued && !lifetime.IsCancellationRequested);
-            if (manual)
-            {
-                ShowNotice("Синхронизация завершена");
-            }
-        }
-        catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
-        {
-        }
-        catch (Exception error)
-        {
-            _syncError = error switch
-            {
-                HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized } =>
-                    "Устройство не авторизовано. Локальные записи сохранены.",
-                _ => "Не удалось связаться с сервером. Локальные записи сохранены.",
-            };
-            if (manual)
-            {
-                ShowNotice(_syncError, error: true);
-            }
-        }
-        finally
-        {
-            _syncBusy = false;
-            if (!lifetime.IsCancellationRequested)
-            {
-                Refresh();
-            }
-        }
-    }
-
     private void AfterChange(string message)
     {
         Refresh();
         ShowNotice(message);
-        _ = SynchronizeAsync();
+        RequestSync();
     }
 
     private void ShowError(Exception error) => ShowNotice(error.Message, error: true);

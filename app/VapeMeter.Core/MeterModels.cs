@@ -4,7 +4,20 @@ namespace VapeMeter.Core;
 
 public sealed record Replacement(Guid Id, DateOnly Date);
 
-public sealed record SyncConflict(Guid OperationId, string Code, DateOnly? LocalDate, DateOnly? ServerDate);
+public sealed record SyncConflict(Guid OperationId, string Code, DateOnly? LocalDate, DateOnly? ServerDate)
+{
+    public Guid RecordId { get; init; }
+
+    public DateOnly? PreviousDate { get; init; }
+
+    public SyncConflictServerRecord? TimewebRecord { get; init; }
+
+    public SyncConflictServerRecord? OccupyingRecord { get; init; }
+
+    public bool KeepLocalRemovesSource { get; init; }
+}
+
+public sealed record SyncConflictServerRecord(Guid Id, DateOnly Date, long Version, bool Deleted);
 
 public sealed record SyncStatus(int PendingCount, DateTimeOffset? LastSynced, IReadOnlyList<SyncConflict> Conflicts);
 
@@ -20,7 +33,7 @@ internal sealed record OperationReply(
 
 internal sealed record LocalChange(
     Guid RecordId, Guid OperationId, long ExpectedVersion, DateOnly? Date,
-    string? ConflictCode = null, DateOnly? ServerDate = null);
+    string? ConflictCode = null, DateOnly? PreviousDate = null, bool MergeOnDate = false);
 
 internal sealed record SyncHeader(Guid? DatasetId, long Revision, string? ETag, DateTimeOffset? LastSynced);
 

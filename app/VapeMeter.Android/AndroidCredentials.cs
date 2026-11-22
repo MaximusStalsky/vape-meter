@@ -79,13 +79,21 @@ internal sealed class AndroidCredentials(string path)
         }
     }
 
-    public void UseOffline() => SaveFile([OfflineMarker]);
+    public void UseOffline()
+    {
+        // An existing connection can resume on the next launch.
+        if (!File.Exists(path))
+        {
+            SaveFile([OfflineMarker], overwrite: false);
+        }
+    }
 
-    private static ISecretKey GetKey(bool allowCreate)
+    private static IKey GetKey(bool allowCreate)
     {
         using var store = KeyStore.GetInstance(KeyStoreProvider)!;
         store.Load(null, null);
-        if (store.GetKey(KeyAlias, null) is ISecretKey existing)
+        // A restored Java key can be wrapped as IKey by the Android binding.
+        if (store.GetKey(KeyAlias, null) is { } existing)
         {
             return existing;
         }
@@ -105,7 +113,7 @@ internal sealed class AndroidCredentials(string path)
         return generator.GenerateKey()!;
     }
 
-    private void SaveFile(byte[] bytes)
+    private void SaveFile(byte[] bytes, bool overwrite = true)
     {
         var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
@@ -115,7 +123,7 @@ internal sealed class AndroidCredentials(string path)
                 stream.Write(bytes);
                 stream.Flush(flushToDisk: true);
             }
-            File.Move(temporary, path, overwrite: true);
+            File.Move(temporary, path, overwrite);
         }
         finally
         {
