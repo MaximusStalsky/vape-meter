@@ -4,11 +4,11 @@
 
 ## Установка Android
 
-Отдельный подписанный APK для Android 12 и новее, ARM64, находится в [GitHub Releases](https://github.com/MaximusStalsky/vape-meter/releases). GitHub показывает выпуск владельцу закрытого репозитория после входа в аккаунт.
+Отдельный подписанный APK для Android 12 и новее, ARM64, находится в [GitHub Releases](https://github.com/MaximusStalsky/vape-meter/releases). APK доступен без входа в GitHub.
 
 При первом запуске нужно ввести ключ Android. На подготовленном Windows-ПК его показывает `app\show-android-connection.cmd`. На телефоне можно считать QR, скопировать текст и вставить ключ в Vape Meter. После подключения приложение автоматически загружает историю. Ключ хранится в защищённом хранилище телефона.
 
-Для обновлений в Komi Store добавьте этот репозиторий после настройки доступа к приватным выпускам. В GitHub можно ограничить fine-grained personal access token этим репозиторием и правом **Contents: Read-only**. В Komi Store используется GitHub-токен, в Vape Meter — свой ключ Android.
+В Komi Store вставьте ссылку на репозиторий в поиск. Если приложение уже установлено, добавьте его через **Tweaks → Link Apps** для отслеживания обновлений. Для публичных выпусков токен GitHub не требуется. Ключ Android используется только для подключения к Timeweb в Vape Meter.
 
 ## Код
 
