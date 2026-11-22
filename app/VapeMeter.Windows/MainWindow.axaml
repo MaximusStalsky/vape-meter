@@ -1,0 +1,90 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="VapeMeter.Windows.MainWindow"
+        Title="Vape Meter" Icon="/Assets/VapeMeter.ico"
+        Width="1140" Height="844" MinWidth="470" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True" WindowDecorations="BorderOnly"
+        Background="{DynamicResource VmShellBackground}">
+  <Window.Styles>
+    <Style Selector="Button.caption">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Foreground" Value="{DynamicResource VmText}"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Width" Value="46"/>
+      <Setter Property="Height" Value="42"/>
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.caption:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource VmHover}"/>
+      <Setter Property="Foreground" Value="{DynamicResource VmText}"/>
+    </Style>
+    <Style Selector="Button.caption.danger:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#B92146"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="Button.caption:pressed /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.75"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="54,*" ClipToBounds="True">
+    <Image Name="ShellBackdrop" Grid.RowSpan="2"
+           Source="avares://VapeMeter.UI/Assets/neon-vapor.png"
+           Stretch="UniformToFill" Opacity=".83" IsHitTestVisible="False"/>
+    <Border Grid.Row="0" Name="TitleRegion" AutomationProperties.AutomationId="VapeMeter.TitleBar"
+            Background="Transparent" WindowDecorationProperties.ElementRole="TitleBar">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0,1,0">
+        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <Border Width="33" Height="33" CornerRadius="11" Background="#30214F">
+            <Image Source="/Assets/VapeMeter.png" Width="28" Height="28"/>
+          </Border>
+          <TextBlock VerticalAlignment="Center" FontSize="21" FontWeight="Bold"
+                     Foreground="{DynamicResource VmText}">
+            <Run Text="Vape "/><Run Text="Meter" Foreground="{DynamicResource VmAccent}"/>
+          </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,5,0,0">
+          <Button Name="ThemeButton" Classes="caption" Click="ToggleTheme"
+                  AutomationProperties.AutomationId="VapeMeter.Window.Theme"
+                  AutomationProperties.Name="Переключить тему">
+            <PathIcon Name="ThemeGlyph" Width="16" Height="16" Foreground="{DynamicResource VmAccent}"
+                      Data="M 11.9,1.05 A 7,7 0 1 0 15,13.3 6.25,6.25 0 0 1 11.9,1.05 Z"/>
+          </Button>
+          <Button Classes="caption" Click="Minimize" WindowDecorationProperties.ElementRole="MinimizeButton"
+                  AutomationProperties.AutomationId="VapeMeter.Window.Minimize"
+                  AutomationProperties.Name="Свернуть">
+            <Border Width="11" Height="1.3" Background="{DynamicResource VmText}"/>
+          </Button>
+          <Button Name="MaximizeButton" Classes="caption" Click="ToggleMaximize"
+                  WindowDecorationProperties.ElementRole="MaximizeButton"
+                  AutomationProperties.AutomationId="VapeMeter.Window.Maximize"
+                  AutomationProperties.Name="Развернуть">
+            <PathIcon Name="MaximizeGlyph" Width="11" Height="11" Foreground="{DynamicResource VmText}"
+                      Data="F0 M0,0 H10 V10 H0 Z M1.2,1.2 H8.8 V8.8 H1.2 Z"/>
+          </Button>
+          <Button Classes="caption danger" Click="CloseWindow" WindowDecorationProperties.ElementRole="CloseButton"
+                  AutomationProperties.AutomationId="VapeMeter.Window.Close"
+                  AutomationProperties.Name="Закрыть">
+            <PathIcon Width="11" Height="11" Foreground="{DynamicResource VmText}"
+                      Data="M0,0.9 L0.9,0 L5,4.1 L9.1,0 L10,0.9 L5.9,5 L10,9.1 L9.1,10 L5,5.9 L0.9,10 L0,9.1 L4.1,5 Z"/>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <ContentControl Grid.Row="1" Name="Workspace" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+    <Grid Name="ResizeRegions" Grid.RowSpan="2">
+      <Border Width="5" HorizontalAlignment="Left" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeW"/>
+      <Border Width="5" HorizontalAlignment="Right" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeE"/>
+      <Border Height="5" VerticalAlignment="Top" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeN"/>
+      <Border Height="5" VerticalAlignment="Bottom" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeS"/>
+      <Border Width="10" Height="10" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeNW"/>
+      <Border Width="10" Height="10" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeNE"/>
+      <Border Width="10" Height="10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeSW"/>
+      <Border Width="10" Height="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="Transparent" WindowDecorationProperties.ElementRole="ResizeSE"/>
+    </Grid>
+  </Grid>
+</Window>

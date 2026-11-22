@@ -1,0 +1,259 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="VmBackground" Color="#0C0816" />
+          <LinearGradientBrush x:Key="VmShellBackground" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#1A1128" />
+            <GradientStop Offset=".55" Color="#110D1C" />
+            <GradientStop Offset="1" Color="#19142D" />
+          </LinearGradientBrush>
+          <LinearGradientBrush x:Key="VmSidebar" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#EA191027" />
+            <GradientStop Offset=".58" Color="#DB110B1A" />
+            <GradientStop Offset="1" Color="#E5251033" />
+          </LinearGradientBrush>
+          <SolidColorBrush x:Key="VmShellBorder" Color="#79578D" />
+          <LinearGradientBrush x:Key="VmCard" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#ED201331" />
+            <GradientStop Offset=".55" Color="#E8140D21" />
+            <GradientStop Offset="1" Color="#F421102A" />
+          </LinearGradientBrush>
+          <SolidColorBrush x:Key="VmCardEdge" Color="#A88864A5" />
+          <SolidColorBrush x:Key="VmLine" Color="#50395F" />
+          <SolidColorBrush x:Key="VmText" Color="#FBF5FF" />
+          <SolidColorBrush x:Key="VmMuted" Color="#D2C4E3" />
+          <SolidColorBrush x:Key="VmAccent" Color="#E0BBFF" />
+          <SolidColorBrush x:Key="VmMint" Color="#71FFDC" />
+          <SolidColorBrush x:Key="VmMintTint" Color="#143933" />
+          <SolidColorBrush x:Key="VmDanger" Color="#FF9AB1" />
+          <SolidColorBrush x:Key="VmDangerTint" Color="#441E33" />
+          <SolidColorBrush x:Key="VmControl" Color="#261936" />
+          <SolidColorBrush x:Key="VmHover" Color="#38234D" />
+          <SolidColorBrush x:Key="VmVioletTint" Color="#492768" />
+          <LinearGradientBrush x:Key="VmAction" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#7A32D1" />
+            <GradientStop Offset="1" Color="#A53ACF" />
+          </LinearGradientBrush>
+          <SolidColorBrush x:Key="VmActionHover" Color="#A943DF" />
+          <LinearGradientBrush x:Key="VmSelected" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#6A2CA7" />
+            <GradientStop Offset="1" Color="#2F1948" />
+          </LinearGradientBrush>
+          <LinearGradientBrush x:Key="VmTile" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#322248" />
+            <GradientStop Offset="1" Color="#1A1229" />
+          </LinearGradientBrush>
+          <LinearGradientBrush x:Key="VmRecorded" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#654397" />
+            <GradientStop Offset="1" Color="#351955" />
+          </LinearGradientBrush>
+          <SolidColorBrush x:Key="VmChartLine" Color="#D47AFF" />
+          <SolidColorBrush x:Key="VmChartFill" Color="#9D3CE7" />
+          <SolidColorBrush x:Key="VmOrbitTrack" Color="#235047" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="VmBackground" Color="#F3EFFA" />
+          <SolidColorBrush x:Key="VmShellBackground" Color="#F9F6FE" />
+          <SolidColorBrush x:Key="VmSidebar" Color="#F9F6FE" />
+          <SolidColorBrush x:Key="VmShellBorder" Color="#D5C4E7" />
+          <SolidColorBrush x:Key="VmCard" Color="#FFFDFF" />
+          <SolidColorBrush x:Key="VmCardEdge" Color="#D9C9EC" />
+          <SolidColorBrush x:Key="VmLine" Color="#DED2ED" />
+          <SolidColorBrush x:Key="VmText" Color="#211633" />
+          <SolidColorBrush x:Key="VmMuted" Color="#605273" />
+          <SolidColorBrush x:Key="VmAccent" Color="#682AB5" />
+          <SolidColorBrush x:Key="VmMint" Color="#00694E" />
+          <SolidColorBrush x:Key="VmMintTint" Color="#E0F4EC" />
+          <SolidColorBrush x:Key="VmDanger" Color="#A52247" />
+          <SolidColorBrush x:Key="VmDangerTint" Color="#FCE6ED" />
+          <SolidColorBrush x:Key="VmControl" Color="#F6F2FB" />
+          <SolidColorBrush x:Key="VmHover" Color="#EEE3FA" />
+          <SolidColorBrush x:Key="VmVioletTint" Color="#EDE1FF" />
+          <LinearGradientBrush x:Key="VmAction" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#6331B8" />
+            <GradientStop Offset="1" Color="#8844CB" />
+          </LinearGradientBrush>
+          <SolidColorBrush x:Key="VmActionHover" Color="#773AC7" />
+          <SolidColorBrush x:Key="VmSelected" Color="#EBDFFF" />
+          <SolidColorBrush x:Key="VmTile" Color="#F6F2FB" />
+          <SolidColorBrush x:Key="VmRecorded" Color="#E9D6FF" />
+          <SolidColorBrush x:Key="VmChartLine" Color="#8A45CA" />
+          <SolidColorBrush x:Key="VmChartFill" Color="#AD78E1" />
+          <SolidColorBrush x:Key="VmOrbitTrack" Color="#CDE3DC" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+  <Style Selector="Grid.vm-workspace">
+    <Setter Property="Background" Value="{DynamicResource VmBackground}" />
+  </Style>
+  <Style Selector="Border.vm-sidebar">
+    <Setter Property="Background" Value="{DynamicResource VmSidebar}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmShellBorder}" />
+  </Style>
+  <Style Selector="Border.vm-card">
+    <Setter Property="Background" Value="{DynamicResource VmCard}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmCardEdge}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="18" />
+    <Setter Property="Padding" Value="16" />
+    <Setter Property="BoxShadow" Value="0 7 24 0 #29090218" />
+  </Style>
+  <Style Selector="Border.vm-inset">
+    <Setter Property="Background" Value="{DynamicResource VmControl}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmLine}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="10,8" />
+  </Style>
+  <Style Selector="Border.vm-icon-tile">
+    <Setter Property="Background" Value="{DynamicResource VmVioletTint}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmCardEdge}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+  </Style>
+  <Style Selector="Border.vm-icon-tile.mint">
+    <Setter Property="Background" Value="{DynamicResource VmMintTint}" />
+  </Style>
+  <Style Selector="Border.vm-rule">
+    <Setter Property="Background" Value="{DynamicResource VmLine}" />
+    <Setter Property="Height" Value="1" />
+  </Style>
+  <Style Selector="Border.vm-dot">
+    <Setter Property="Background" Value="{DynamicResource VmMint}" />
+  </Style>
+  <Style Selector="Border.vm-dot.warning">
+    <Setter Property="Background" Value="{DynamicResource VmDanger}" />
+  </Style>
+  <Style Selector="Border.vm-dot.pending">
+    <Setter Property="Background" Value="{DynamicResource VmAccent}" />
+  </Style>
+  <Style Selector="Border.vm-violet-dot">
+    <Setter Property="Background" Value="{DynamicResource VmChartLine}" />
+  </Style>
+  <Style Selector="TextBlock.vm-text">
+    <Setter Property="Foreground" Value="{DynamicResource VmText}" />
+  </Style>
+  <Style Selector="TextBlock.vm-text.muted">
+    <Setter Property="Foreground" Value="{DynamicResource VmMuted}" />
+  </Style>
+  <Style Selector="TextBlock.vm-text.accent">
+    <Setter Property="Foreground" Value="{DynamicResource VmAccent}" />
+  </Style>
+  <Style Selector="TextBlock.vm-text.mint">
+    <Setter Property="Foreground" Value="{DynamicResource VmMint}" />
+  </Style>
+  <Style Selector="TextBlock.vm-text.danger">
+    <Setter Property="Foreground" Value="{DynamicResource VmDanger}" />
+  </Style>
+  <Style Selector="Path.vm-icon">
+    <Setter Property="Stroke" Value="{DynamicResource VmAccent}" />
+    <Setter Property="StrokeThickness" Value="1.65" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+  </Style>
+  <Style Selector="Path.vm-icon.mint">
+    <Setter Property="Stroke" Value="{DynamicResource VmMint}" />
+  </Style>
+  <Style Selector="Path.vm-icon.white">
+    <Setter Property="Stroke" Value="#FFFFFF" />
+  </Style>
+  <Style Selector="Path.vm-icon.muted">
+    <Setter Property="Stroke" Value="{DynamicResource VmMuted}" />
+  </Style>
+  <Style Selector="Button.vm-button">
+    <Setter Property="Background" Value="{DynamicResource VmControl}" />
+    <Setter Property="Foreground" Value="{DynamicResource VmText}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmLine}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="9" />
+    <Setter Property="MinHeight" Value="35" />
+    <Setter Property="Padding" Value="11,6" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Button.vm-button:pointerover">
+    <Setter Property="Background" Value="{DynamicResource VmHover}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmShellBorder}" />
+  </Style>
+  <Style Selector="Button.vm-button:pressed">
+    <Setter Property="Opacity" Value=".80" />
+  </Style>
+  <Style Selector="Button.vm-button:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource VmAccent}" />
+  </Style>
+  <Style Selector="Button.vm-button:disabled">
+    <Setter Property="Opacity" Value=".45" />
+  </Style>
+  <Style Selector="Button.vm-button.primary">
+    <Setter Property="Background" Value="{DynamicResource VmAction}" />
+    <Setter Property="BorderBrush" Value="#B99AE3" />
+    <Setter Property="Foreground" Value="#FFFFFF" />
+  </Style>
+  <Style Selector="Button.vm-button.primary:pointerover">
+    <Setter Property="Background" Value="{DynamicResource VmActionHover}" />
+  </Style>
+  <Style Selector="Button.vm-button.danger">
+    <Setter Property="Background" Value="{DynamicResource VmDangerTint}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmDanger}" />
+    <Setter Property="Foreground" Value="{DynamicResource VmDanger}" />
+  </Style>
+  <Style Selector="Button.vm-button.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource VmMuted}" />
+    <Setter Property="MinHeight" Value="42" />
+  </Style>
+  <Style Selector="Button.vm-button.nav:pointerover">
+    <Setter Property="Background" Value="{DynamicResource VmHover}" />
+    <Setter Property="Foreground" Value="{DynamicResource VmText}" />
+  </Style>
+  <Style Selector="Button.vm-button.active">
+    <Setter Property="Background" Value="{DynamicResource VmSelected}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmShellBorder}" />
+    <Setter Property="Foreground" Value="{DynamicResource VmText}" />
+  </Style>
+  <Style Selector="Button.vm-button.day">
+    <Setter Property="Background" Value="{DynamicResource VmTile}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmShellBorder}" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Button.vm-button.day:pointerover">
+    <Setter Property="Background" Value="{DynamicResource VmHover}" />
+  </Style>
+  <Style Selector="Button.vm-button.day.weekend">
+    <Setter Property="Foreground" Value="{DynamicResource VmAccent}" />
+  </Style>
+  <Style Selector="Button.vm-button.day.recorded">
+    <Setter Property="Background" Value="{DynamicResource VmRecorded}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource VmAccent}" />
+  </Style>
+  <Style Selector="Button.vm-button.day.selected">
+    <Setter Property="Background" Value="{DynamicResource VmAction}" />
+    <Setter Property="Foreground" Value="#FFFFFF" />
+  </Style>
+  <Style Selector="Button.vm-button.day.today">
+    <Setter Property="BorderBrush" Value="{DynamicResource VmMint}" />
+    <Setter Property="BorderThickness" Value="1.5" />
+  </Style>
+</Styles>

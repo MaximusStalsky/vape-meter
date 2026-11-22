@@ -1,0 +1,36 @@
+# Local builds and SDKs
+/toolchain/
+/dist/
+**/bin/
+**/obj/
+**/publish/
+**/.vs/
+**/__pycache__/
+*.apk
+*.aab
+*.pdb
+
+# This machine's hosting administration
+/backend/deploy/
+/backend/deploy_timeweb.py
+
+# Local data, credentials and signing keys
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.dpapi
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+.env
+.env.*
+**/secrets.env
+**/vpn-secrets/
+**/window-settings.json
+**/startup-error.log

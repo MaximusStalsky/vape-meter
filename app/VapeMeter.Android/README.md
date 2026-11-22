@@ -1,0 +1,32 @@
+# Vape Meter для Android
+
+- Идентификатор пакета `org.stalsky.vapemeter`.
+- Выпуск `1.0.1`, код версии `10001`.
+- Android 12 и новее, API 31+, архитектура ARM64. Целевая платформа API 36.
+- Для следующего выпуска Android увеличьте `ApplicationVersion` в проекте. Номер версии для интерфейса задаётся через `ApplicationDisplayVersion`.
+
+При первом запуске вставьте ключ Android и нажмите «Подключить Timeweb» либо выберите «Работать автономно». Подключиться позже, заменить недействительный ключ или вернуться к автономной работе можно через «Настройки → Синхронизация → Подключение». После проверки ключа открывается общий экран. История обновляется автоматически при запуске и после сохранения изменений, а при недоступном сервере изменения остаются в локальной очереди. Повторить обмен можно в настройках.
+
+Ключ проверяется запросом `GET /v1/state` к `https://vapemeter.stalsky.org/`. Переадресация и незашифрованный трафик запрещены. Ключ шифруется AES-GCM через Android Keystore, затем сохраняется вместе с локальной SQLite в закрытом каталоге Android, исключённом из резервного копирования.
+
+## Сборка Release для подписи
+
+Установите .NET 10 SDK с workload `android`, Android SDK с платформой 36, Build Tools 36.0.0 и JDK 21. Задайте `ANDROID_HOME` и `JAVA_HOME` в текущем PowerShell. На подготовленном ПК пути указаны в локальном `toolchain/README.md`. Из корня проекта выполните:
+
+```powershell
+dotnet build '.\app\VapeMeter.Android\VapeMeter.Android.csproj' `
+  -c Release -r android-arm64 -t:Package --disable-build-servers `
+  "-p:AndroidSdkDirectory=$env:ANDROID_HOME" "-p:JavaSdkDirectory=$env:JAVA_HOME"
+```
+
+Файл для дальнейшей выравнивания и подписи находится в `bin/Release/net10.0-android36.0/android-arm64/org.stalsky.vapemeter.apk`. SDK может автоматически создать соседнюю сборку `-Signed.apk` с отладочным сертификатом. Для постоянной подписи используйте APK без этого суффикса, затем выровняйте ZIP и подпишите ключом выпуска.
+
+Для выпуска подпишите APK постоянным ключом Vape Meter:
+
+```powershell
+.\app\sign-android.ps1 -UnsignedApk '<путь к unsigned APK>' `
+  -OutputApk '.\dist\Android\VapeMeter-1.0.1-android-arm64.apk' `
+  -AndroidSdk $env:ANDROID_HOME -JavaHome $env:JAVA_HOME
+```
+
+Скрипт сохраняет ключ подписи в профиле текущего пользователя Windows. Для обновлений используйте тот же ключ и увеличивайте код версии.

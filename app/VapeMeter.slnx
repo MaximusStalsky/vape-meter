@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="VapeMeter.Analytics/VapeMeter.Analytics.csproj" />
+  <Project Path="VapeMeter.Core/VapeMeter.Core.csproj" />
+  <Project Path="VapeMeter.UI/VapeMeter.UI.csproj" />
+  <Project Path="VapeMeter.Windows/VapeMeter.Windows.csproj" />
+  <Project Path="VapeMeter.Android/VapeMeter.Android.csproj" />
+</Solution>

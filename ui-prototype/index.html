@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Vape Meter</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <svg class="symbol-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-brand" viewBox="0 0 32 32"><path d="M4.5 21.5a6.8 6.8 0 0 1 5.9-10.2 8.1 8.1 0 0 1 15.4 1.3 5.8 5.8 0 0 1 .3 11.5h-3.4"/><path d="M5.8 25.9c1.1-3.5 3.1-5.1 6.4-5.1H16c2.5 0 4.4-1.1 5.6-3.2M10 28c1.3-2.5 3-3.9 5.5-3.9h2.8"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18m-13 5h2m4 0h2"/></symbol>
+    <symbol id="i-pod" viewBox="0 0 24 24"><path d="M8 9V6.5a4 4 0 0 1 8 0V9m-9 0h10l1 9.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 18.5zm0 4h10"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.6 6.4M3 4v8h8m1-4v4l3 2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4m0 16h16M9 16v-4m5 4V7m5 9V4"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M9.5 3h5l.6 2.6 2 .9 2.3-1.1 2.5 4.3-1.9 1.8v2l1.9 1.8-2.5 4.3-2.3-1.1-2 .9-.6 2.6h-5l-.6-2.6-2-.9-2.3 1.1-2.5-4.3 1.9-1.8v-2L2.1 9.7l2.5-4.3 2.3 1.1 2-.9z"/><circle cx="12" cy="12.5" r="3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zm-9 9 9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v15m-6-6 6 6 6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V5m-6 6 6-6 6 6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8zm9 12v7m-3.5-3.5h7"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.9 13.4A9 9 0 0 1 10.6 3.1 9 9 0 1 0 20.9 13.4Z"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m14 6 4 4M4 20l4-.8L20 7l-3-3L5 16l-1 4z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 3 6.2M4 6v6h6"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+  </svg>
+
+  <header class="titlebar">
+    <div class="brand"><span class="brand-icon"><svg class="icon"><use href="#i-brand"/></svg></span><span>Vape <strong>Meter</strong></span></div>
+    <div class="title-tools">
+      <button class="icon-button theme-switch" type="button" aria-label="Светлая тема" title="Сменить тему"></button>
+      <div class="window-controls" aria-hidden="true" title="Макет кнопок окна Windows">
+        <span class="window-min"></span><span class="window-max"></span><span class="window-close"></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar">
+      <nav class="navigation" aria-label="Разделы">
+        <button class="nav-link is-current" data-view="overview" aria-label="Обзор" title="Обзор" aria-current="page" type="button"><svg class="icon"><use href="#i-home"/></svg><span>Обзор</span></button>
+        <button class="nav-link" data-view="history" aria-label="История" title="История" type="button"><svg class="icon"><use href="#i-history"/></svg><span>История</span></button>
+        <button class="nav-link" data-view="analytics" aria-label="Аналитика" title="Аналитика" type="button"><svg class="icon"><use href="#i-chart"/></svg><span>Аналитика</span></button>
+        <button class="nav-link nav-settings" data-view="settings" aria-label="Настройки" title="Настройки" type="button"><svg class="icon"><use href="#i-settings"/></svg><span>Настройки</span></button>
+      </nav>
+      <div class="local-status"><span class="status-dot"></span><span>Демоданные<span class="status-note">Локальный режим</span></span></div>
+    </aside>
+
+    <main class="content" data-page="overview">
+      <div class="page-intro">
+        <div><h1 id="page-title" tabindex="-1">Обзор</h1><p id="page-description">Календарь замен и срок службы картриджей</p></div>
+        <button class="button primary" id="page-add" type="button"><svg class="icon"><use href="#i-plus"/></svg>Добавить замену</button>
+      </div>
+
+      <div class="dashboard">
+        <section class="card calendar-card" aria-labelledby="calendar-title">
+          <div class="card-header">
+            <div class="heading-group">
+              <span class="tile-icon violet" aria-hidden="true"><svg class="icon"><use href="#i-calendar"/></svg></span>
+              <div><h2 id="calendar-title">Последние 30 дней</h2><p id="period-label" class="subtle"></p></div>
+            </div>
+            <div class="period-controls">
+              <button class="icon-button" id="period-prev" type="button" aria-label="Предыдущие 30 дней" title="Предыдущие 30 дней"><svg class="icon"><use href="#i-left"/></svg></button>
+              <button class="icon-button" id="period-next" type="button" aria-label="Следующие 30 дней" title="Следующие 30 дней"><svg class="icon"><use href="#i-right"/></svg></button>
+            </div>
+          </div>
+          <div class="weekdays" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+          <div class="calendar-grid" id="calendar-grid" role="group" aria-label="Выбор даты"></div>
+          <div class="day-panel">
+            <div class="day-summary"><span class="day-status-icon" id="day-icon" aria-hidden="true"></span><div><strong id="selected-date"></strong><span id="selected-status" class="subtle"></span></div></div>
+            <div id="day-actions" class="day-actions"></div>
+          </div>
+        </section>
+
+        <section class="card forecast-card" aria-labelledby="forecast-title">
+          <div class="heading-group">
+            <span class="tile-icon mint" aria-hidden="true"><svg class="icon"><use href="#i-spark"/></svg></span>
+            <div><h2 id="forecast-title">Следующая замена</h2><p class="subtle">Прогноз по вашей истории</p></div>
+          </div>
+          <div class="forecast-orbit" id="forecast-orbit">
+            <div class="orbit-grid" aria-hidden="true"></div>
+            <div class="orbit-scale" aria-hidden="true"></div>
+            <div class="orbit-ring" aria-hidden="true"></div>
+            <div class="orbit-core"><span id="forecast-value">—</span><span id="forecast-note"></span></div>
+          </div>
+          <div class="forecast-details">
+            <div><span id="forecast-range-label" class="subtle">Диапазон дат</span><strong id="forecast-range"></strong></div>
+            <div><span class="subtle">Текущий картридж</span><strong id="forecast-current"></strong></div>
+          </div>
+          <p class="forecast-caption subtle" id="forecast-caption"></p>
+        </section>
+
+        <div class="analytics-only analytics-filters" aria-label="Период статистики">
+          <p class="subtle" id="analytics-period-label"></p>
+          <button class="icon-button" id="analytics-prev" type="button" aria-label="Предыдущие 30 дней"><svg class="icon"><use href="#i-left"/></svg></button>
+          <button class="icon-button" id="analytics-next" type="button" aria-label="Следующие 30 дней"><svg class="icon"><use href="#i-right"/></svg></button>
+        </div>
+        <section class="metrics" aria-label="Статистика выбранного периода" id="metrics"></section>
+
+        <section class="card chart-card" aria-labelledby="chart-title">
+          <div class="card-header chart-header">
+            <div class="heading-group">
+              <span class="tile-icon violet" aria-hidden="true"><svg class="icon"><use href="#i-chart"/></svg></span>
+              <div><h2 id="chart-title">Срок службы картриджей</h2><p class="subtle" id="chart-subtitle">Дни между заменами</p></div>
+            </div>
+            <div class="segmented" role="group" aria-label="Масштаб графика">
+              <button type="button" data-scope="period" aria-pressed="true">Период</button>
+              <button type="button" data-scope="all" aria-pressed="false">Вся история</button>
+            </div>
+          </div>
+          <div class="chart-scroll">
+            <div id="chart-stage" class="chart-stage" hidden>
+              <canvas id="chart-canvas" aria-hidden="true"></canvas>
+              <div id="chart-points" class="chart-points" role="group" aria-label="Завершённые циклы"></div>
+              <div id="chart-tip" class="chart-tip" aria-hidden="true" hidden></div>
+            </div>
+          </div>
+          <div id="chart-empty" class="empty-state" hidden></div>
+          <div class="chart-footer" id="chart-footer" hidden>
+            <span><i class="legend-dot"></i>Завершённый цикл</span><span id="chart-average"></span>
+          </div>
+        </section>
+
+        <section class="card history-card" aria-labelledby="history-title">
+          <div class="heading-group history-header">
+            <span class="tile-icon violet" aria-hidden="true"><svg class="icon"><use href="#i-history"/></svg></span>
+            <div><h2 id="history-title">Журнал замен</h2><p class="subtle" id="history-count"></p></div>
+          </div>
+          <ul class="history-list" id="history-list"></ul>
+          <div class="empty-state" id="history-empty" hidden>В журнале пока нет замен</div>
+        </section>
+
+        <section class="card settings-card" aria-labelledby="settings-title">
+          <div class="heading-group">
+            <span class="tile-icon violet" aria-hidden="true"><svg class="icon"><use href="#i-settings"/></svg></span>
+            <div><h2 id="settings-title">Параметры прототипа</h2><p class="subtle">Оформление и демоданные</p></div>
+          </div>
+          <div class="setting-row">
+            <div><h3>Тема оформления</h3><p class="subtle">Сохраняется в этом браузере</p></div>
+            <div class="segmented" role="group" aria-label="Тема оформления">
+              <button type="button" data-theme-value="dark" aria-pressed="true">Тёмная</button>
+              <button type="button" data-theme-value="light" aria-pressed="false">Светлая</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div><h3>Демонстрационные записи</h3><p class="subtle">Восстановите исходную историю замен</p></div>
+            <button class="button secondary" id="reset-data" type="button"><svg class="icon"><use href="#i-reset"/></svg>Сбросить демоданные</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="editor-form">
+      <div class="dialog-heading"><h2 id="editor-title"></h2><button class="icon-button" type="button" data-close="editor" aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <label for="entry-date">Дата замены</label>
+      <input type="date" id="entry-date" required aria-describedby="editor-error">
+      <p class="form-error" id="editor-error" aria-live="polite"></p>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="editor">Отмена</button><button class="button primary" type="submit">Сохранить</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+    <div class="dialog-heading"><h2 id="confirm-title"></h2><button class="icon-button" type="button" data-close="confirm-dialog" aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <p class="subtle" id="confirm-text"></p>
+    <div class="dialog-actions"><button class="button secondary" type="button" data-close="confirm-dialog" autofocus>Отмена</button><button class="button danger" type="button" id="confirm-action"></button></div>
+  </dialog>
+
+  <div id="date-menu" class="date-menu" role="menu" aria-label="Действия с датой" hidden></div>
+  <div id="toast" class="toast" role="status" hidden><svg class="icon"><use href="#i-check"/></svg><span id="toast-text"></span></div>
+</body>
+</html>
