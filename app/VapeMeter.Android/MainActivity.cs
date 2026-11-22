@@ -28,7 +28,11 @@ public sealed class MainActivity : AvaloniaMainActivity
     protected override void OnResume()
     {
         base.OnResume();
-        (Content as PhoneShell)?.SetSyncActive(true);
+        if (Content is PhoneShell shell)
+        {
+            shell.SetSystemWindow(Window);
+            shell.SetSyncActive(true);
+        }
     }
 
     protected override void OnPause()

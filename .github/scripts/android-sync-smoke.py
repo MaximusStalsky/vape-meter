@@ -171,11 +171,18 @@ def exercise(apk):
             wait_for("VapeMeter.SyncUnavailable")
             assert node(tree(), "VapeMeter.AndroidKey") is None
             assert node(tree(), "VapeMeter.PageTitle") is None
-            print("Calendar navigation button bounds:", wait_for("VapeMeter.PreviousPeriod").attrib["bounds"], flush=True)
+            calendar_bounds = wait_for("VapeMeter.PreviousPeriod").attrib["bounds"]
+            print("Calendar navigation button bounds:", calendar_bounds, flush=True)
             window_insets = adb("shell", "dumpsys", "window", "displays")
             bars = [line.strip() for line in window_insets.splitlines()
                     if "frame=" in line and ("type=statusBars" in line or "type=navigationBars" in line)]
             print("Reported system bar insets:", bars[:4], flush=True)
+            status_bottoms = [int(value) for line in bars if "type=statusBars" in line
+                              for value in re.findall(r"frame=\[\d+,\d+\]\[\d+,(\d+)\]", line)]
+            if status_bottoms:
+                calendar_top = int(re.findall(r"\d+", calendar_bounds)[1])
+                density = int(re.findall(r"\d+", adb("shell", "wm", "density"))[-1])
+                assert 0 <= calendar_top - max(status_bottoms) <= 58 * density / 160
             print("Saved key opened the cached calendar after a cold restart without network.", flush=True)
 
             choose_day(today, "Добавить замену")

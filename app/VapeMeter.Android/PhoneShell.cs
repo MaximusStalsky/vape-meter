@@ -28,7 +28,7 @@ internal sealed class PhoneShell : Border
     private TopLevel? _topLevel;
     private IInsetsManager? _insets;
     private IInputPane? _inputPane;
-    private Thickness _safeArea;
+    private global::Android.Views.Window? _systemWindow;
     private bool _syncActive;
 
     public PhoneShell(MeterStore store, AndroidCredentials credentials, TimewebConnection connection)
@@ -70,6 +70,12 @@ internal sealed class PhoneShell : Border
     {
         _syncActive = active;
         _journal?.SetSyncActive(active);
+    }
+
+    public void SetSystemWindow(global::Android.Views.Window? window)
+    {
+        _systemWindow = window;
+        UpdateLayoutPadding();
     }
 
     private void ShowJournal(string? token, string? connectionError = null)
@@ -266,7 +272,6 @@ internal sealed class PhoneShell : Border
             insets.SafeAreaChanged += OnSafeAreaChanged;
             insets.DisplayEdgeToEdgePreference = true;
             insets.SystemBarColor = SystemBarsBackground;
-            _safeArea = insets.SafeAreaPadding;
         }
         _topLevel.BackRequested += OnBackRequested;
         _inputPane = _topLevel.InputPane;
@@ -295,7 +300,7 @@ internal sealed class PhoneShell : Border
         _topLevel = null;
         _inputPane = null;
         _insets = null;
-        _safeArea = default;
+        _systemWindow = null;
     }
 
     private void OnBackRequested(object? sender, RoutedEventArgs args)
@@ -315,11 +320,7 @@ internal sealed class PhoneShell : Border
         }
     }
 
-    private void OnSafeAreaChanged(object? sender, SafeAreaChangedArgs args)
-    {
-        _safeArea = args.SafeAreaPadding;
-        UpdateLayoutPadding();
-    }
+    private void OnSafeAreaChanged(object? sender, SafeAreaChangedArgs args) => UpdateLayoutPadding();
 
     private void OnInputPaneChanged(object? sender, InputPaneStateEventArgs args)
     {
@@ -332,14 +333,19 @@ internal sealed class PhoneShell : Border
 
     private void UpdateLayoutPadding()
     {
-        var keyboardPadding = _topLevel is { } top
-            && _inputPane is { State: InputPaneState.Open } input
-            && input.OccludedRect.Height > 0
-            && this.TranslatePoint(new Point(0, Bounds.Height), top) is { } bottom
-                ? Math.Clamp(bottom.Y - input.OccludedRect.Top, 0, Bounds.Height)
-                : 0;
-        // The keyboard overlap is measured from the window bottom and already includes the navigation bar.
-        Padding = new Thickness(_safeArea.Left, _safeArea.Top, _safeArea.Right, Math.Max(_safeArea.Bottom, keyboardPadding));
+        if (_systemWindow?.DecorView is { RootWindowInsets: { } nativeInsets } decorView
+            && decorView.Resources?.DisplayMetrics?.Density is > 0 and var density)
+        {
+            var barsAndCutout = global::Android.Views.WindowInsets.Type.SystemBars()
+                | global::Android.Views.WindowInsets.Type.DisplayCutout();
+            var bars = nativeInsets.GetInsets(barsAndCutout);
+            var keyboard = nativeInsets.GetInsets(global::Android.Views.WindowInsets.Type.Ime());
+            Padding = new Thickness(bars.Left / density, bars.Top / density, bars.Right / density,
+                Math.Max(bars.Bottom, keyboard.Bottom) / density);
+            return;
+        }
+
+        Padding = _insets?.SafeAreaPadding ?? default;
     }
 
     private static TextBlock Label(string value, double fontSize, string tone = "")
