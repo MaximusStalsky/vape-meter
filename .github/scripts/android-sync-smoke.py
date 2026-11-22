@@ -37,8 +37,9 @@ def wait_for(identifier, check=lambda item: True):
         item = node(nodes, identifier)
         if item is not None and check(item):
             return item
-    available = [item.attrib for item in tree() if item.get("package") == PACKAGE]
-    raise AssertionError(f"{identifier} unavailable. App nodes: {available!r}")
+    available = [{key: item.get(key) for key in ("resource-id", "content-desc", "class", "package", "bounds")}
+                 for item in tree()[:24]]
+    raise AssertionError(f"{identifier} unavailable. Visible nodes: {available!r}")
 
 
 def tap(item):
@@ -145,7 +146,10 @@ def exercise(apk):
         worker.start()
         adb("reverse", f"tcp:{PORT}", f"tcp:{PORT}")
         try:
-            adb("shell", "am", "start", "-W", "-n", activity)
+            adb("logcat", "-b", "crash", "-c")
+            output = adb("shell", "am", "start", "-W", "-n", activity)
+            print(output, flush=True)
+            assert "Status: ok" in output, output
             tap(wait_for("VapeMeter.AndroidKey"))
             adb("shell", "input", "text", TOKEN)
             adb("shell", "input", "keyevent", "KEYCODE_BACK")
@@ -180,6 +184,11 @@ def exercise(apk):
             with state.lock:
                 assert any(item["date"] == str(today) and not item["deleted"] for item in state.records.values())
             print("Calendar actions survived offline restart, synced on reconnect and showed the version choice.", flush=True)
+        except Exception:
+            top = adb("shell", "dumpsys", "activity", "activities")
+            print("\n".join(line for line in top.splitlines() if "topResumedActivity" in line), flush=True)
+            print(adb("logcat", "-d", "-b", "crash"), flush=True)
+            raise
         finally:
             adb("shell", "am", "force-stop", PACKAGE)
             adb("uninstall", PACKAGE)
