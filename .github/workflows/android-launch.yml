@@ -13,7 +13,8 @@ on:
         type: string
 
 permissions:
-  contents: read
+  # GitHub only exposes draft releases to callers with repository push access.
+  contents: write
 
 jobs:
   launch:
