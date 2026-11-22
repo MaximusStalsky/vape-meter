@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="VapeMeterTheme" parent="android:style/Theme.Material.NoActionBar">
+  <style name="VapeMeterTheme" parent="Theme.AppCompat.NoActionBar">
     <item name="android:windowBackground">#110D1C</item>
     <item name="android:windowLightStatusBar">false</item>
     <item name="android:windowLightNavigationBar">false</item>

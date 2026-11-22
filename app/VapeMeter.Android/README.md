@@ -1,7 +1,7 @@
 # Vape Meter для Android
 
 - Идентификатор пакета `org.stalsky.vapemeter`.
-- Выпуск `1.0.1`, код версии `10001`.
+- Выпуск `1.0.2`, код версии `10002`.
 - Android 12 и новее, API 31+, архитектура ARM64. Целевая платформа API 36.
 - Для следующего выпуска Android увеличьте `ApplicationVersion` в проекте. Номер версии для интерфейса задаётся через `ApplicationDisplayVersion`.
 
@@ -25,8 +25,14 @@ dotnet build '.\app\VapeMeter.Android\VapeMeter.Android.csproj' `
 
 ```powershell
 .\app\sign-android.ps1 -UnsignedApk '<путь к unsigned APK>' `
-  -OutputApk '.\dist\Android\VapeMeter-1.0.1-android-arm64.apk' `
+  -OutputApk '.\dist\Android\VapeMeter-1.0.2-android-arm64.apk' `
   -AndroidSdk $env:ANDROID_HOME -JavaHome $env:JAVA_HOME
 ```
 
 Скрипт сохраняет ключ подписи в профиле текущего пользователя Windows. Для обновлений используйте тот же ключ и увеличивайте код версии.
+
+## Проверки
+
+Сборка Release прошла без диагностик компилятора. Из готового unsigned APK проверены идентификатор, версия, ARM64, минимальный API, значок, встроенная SQLite и ограничения манифеста. Загружаемые сегменты всех включённых ELF-библиотек совместимы со страницами 16 КБ. ZIP требуется выровнять перед подписью.
+
+Сценарии первого запуска проверены headless с имитацией HTTP и хранилища ключа. Проверены неверный формат, HTTP 401 без сохранения ключа, автономный выбор, подключение из настроек, Back, очистка поля и получение синтетической истории в SQLite. Реальные ключи и данные Timeweb не использовались. Проверка Android Keystore и экранной клавиатуры на устройстве ещё не выполнялась.
