@@ -126,9 +126,17 @@ def handler_for(state):
             self.dispatch("/v1/state", lambda: (200, state.get()))
 
         def do_POST(self):
-            self.dispatch("/v1/operations", lambda: state.apply(json.loads(
-                self.rfile.read(int(self.headers["Content-Length"]))
-            )))
+            self.dispatch("/v1/operations", lambda: state.apply(json.loads(self.read_body())))
+
+        def read_body(self):
+            if self.headers.get("Transfer-Encoding", "").lower() == "chunked":
+                chunks = bytearray()
+                while size := int(self.rfile.readline().split(b";", 1)[0], 16):
+                    chunks.extend(self.rfile.read(size))
+                    if self.rfile.read(2) != b"\r\n":
+                        raise ValueError("Invalid chunk separator")
+                return chunks
+            return self.rfile.read(int(self.headers["Content-Length"]))
 
     return Handler
 
@@ -163,6 +171,11 @@ def exercise(apk):
             wait_for("VapeMeter.SyncUnavailable")
             assert node(tree(), "VapeMeter.AndroidKey") is None
             assert node(tree(), "VapeMeter.PageTitle") is None
+            print("Calendar navigation button bounds:", wait_for("VapeMeter.PreviousPeriod").attrib["bounds"], flush=True)
+            window_insets = adb("shell", "dumpsys", "window", "displays")
+            bars = [line.strip() for line in window_insets.splitlines()
+                    if "frame=" in line and ("type=statusBars" in line or "type=navigationBars" in line)]
+            print("Reported system bar insets:", bars[:4], flush=True)
             print("Saved key opened the cached calendar after a cold restart without network.", flush=True)
 
             choose_day(today, "Добавить замену")
